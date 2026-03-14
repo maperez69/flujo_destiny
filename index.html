@@ -4,15 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ecosistema Operativo - Destiny Real Estate</title>
-    <!-- Tailwind CSS para el diseño -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React y Babel para que el navegador entienda el código interactivo -->
+    <!-- React y Babel -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/lucide-react@latest"></script>
     
     <style>
         @keyframes spin-slow {
@@ -25,20 +24,44 @@
         html {
             scroll-behavior: smooth;
         }
+        /* Prevenir flash de contenido no estilizado */
+        [v-cloak] { display: none; }
     </style>
 </head>
 <body class="bg-gray-50">
-    <div id="root"></div>
+    <div id="root">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="text-center">
+                <div class="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Cargando Ecosistema...</p>
+            </div>
+        </div>
+    </div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
-        const { 
-            Users, Cpu, PenTool, Settings, BarChart3, CheckCircle2, 
-            ArrowRight, Search, Upload, Target, FileText, MousePointer2, 
-            Calendar, RefreshCw, ArrowUpRight, ArrowDownRight, ChevronRight, Zap 
-        } = lucideReact;
 
-        const FlowNode = ({ id, icon: Icon, title, color, isActive, onClick }) => (
+        // Definición de iconos SVG manual para evitar errores de librería externa
+        const Icon = ({ name, size = 20, className = "" }) => {
+            const icons = {
+                users: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+                cpu: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>,
+                pen: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l5 5"/><path d="M11 11l1 1"/></svg>,
+                settings: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>,
+                chart: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>,
+                check: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"/></svg>,
+                refresh: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg>,
+                file: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14.5 2 14.5 7 20 7"/></svg>,
+                search: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+                calendar: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y1="10"/></svg>,
+                arrowRight: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
+                chevronRight: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 18 15 12 9 6"/></svg>,
+                zap: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            };
+            return icons[name] || icons.check;
+        };
+
+        const FlowNode = ({ id, icon, title, color, isActive, onClick }) => (
             <div 
                 id={`node-${id}`}
                 onClick={onClick}
@@ -46,23 +69,23 @@
                     ${isActive ? `border-${color}-500 bg-${color}-50 shadow-xl scale-105 z-10 ring-4 ring-${color}-200` : 'border-gray-200 bg-white hover:border-gray-300'}`}
             >
                 <div className={`p-2 rounded-xl bg-${color}-100 mb-2 transition-colors duration-500`}>
-                    <Icon size={20} className={`text-${color}-600`} />
+                    <Icon name={icon} className={`text-${color}-600`} />
                 </div>
                 <span className="text-xs md:text-[11px] font-bold text-center text-gray-800 leading-tight uppercase tracking-tight">
                     {title}
                 </span>
                 {isActive && (
                     <div className="absolute -top-2 -right-2 bg-green-500 text-white p-1 rounded-full shadow-lg animate-bounce">
-                        <CheckCircle2 size={12} />
+                        <Icon name="check" size={12} />
                     </div>
                 )}
             </div>
         );
 
-        const DepartmentHeader = ({ title, icon: Icon, color }) => (
+        const DepartmentHeader = ({ title, icon, color }) => (
             <div className={`flex flex-col items-center mb-6 md:sticky md:top-0 bg-white md:bg-gray-50/90 backdrop-blur-sm py-4 z-20 w-full border-b-2 border-${color}-200 rounded-t-2xl md:rounded-none shadow-sm md:shadow-none`}>
                 <div className={`p-3 rounded-full bg-${color}-600 text-white mb-2 shadow-lg`}>
-                    <Icon size={22} />
+                    <Icon name={icon} size={22} />
                 </div>
                 <h3 className="text-sm md:text-[12px] font-black text-gray-800 uppercase tracking-widest text-center">{title}</h3>
             </div>
@@ -86,66 +109,66 @@
                 {
                     id: 'team',
                     title: 'TEAM',
-                    icon: Users,
+                    icon: 'users',
                     color: 'blue',
                     steps: [
-                        { id: 'inicio', title: 'Inicio', icon: CheckCircle2 },
-                        { id: 'temas', title: 'Definición de Temas', icon: PenTool },
-                        { id: 'planeacion', title: 'Planeación de Fechas', icon: Calendar },
-                        { id: 'gemini', title: 'Carga en Gemini', icon: Cpu, jumpTo: 'EQUIPO IA' },
-                        { id: 'aprobacion', title: 'Aprobación Plan', icon: CheckCircle2, jumpTo: 'MKT CONTENIDOS' }
+                        { id: 'inicio', title: 'Inicio', icon: 'check' },
+                        { id: 'temas', title: 'Definición de Temas', icon: 'pen' },
+                        { id: 'planeacion', title: 'Planeación de Fechas', icon: 'calendar' },
+                        { id: 'gemini', title: 'Carga en Gemini', icon: 'cpu', jumpTo: 'EQUIPO IA' },
+                        { id: 'aprobacion', title: 'Aprobación Plan', icon: 'check', jumpTo: 'MKT CONTENIDOS' }
                     ]
                 },
                 {
                     id: 'ia',
                     title: 'EQUIPO IA',
-                    icon: Cpu,
+                    icon: 'cpu',
                     color: 'purple',
                     steps: [
-                        { id: 'research', title: 'Research de Medios', icon: Search },
-                        { id: 'curaduria', title: 'Curaduría y Filtro', icon: Settings },
-                        { id: 'centralizacion', title: 'Centralización Info', icon: FileText },
-                        { id: 'propuesta', title: 'Propuesta Semanal', icon: RefreshCw, jumpTo: 'REGRESA A TEAM' }
+                        { id: 'research', title: 'Research de Medios', icon: 'search' },
+                        { id: 'curaduria', title: 'Curaduría y Filtro', icon: 'settings' },
+                        { id: 'centralizacion', title: 'Centralización Info', icon: 'file' },
+                        { id: 'propuesta', title: 'Propuesta Semanal', icon: 'refresh', jumpTo: 'REGRESA A TEAM' }
                     ]
                 },
                 {
                     id: 'contenidos',
                     title: 'MKT CONTENIDOS',
-                    icon: PenTool,
+                    icon: 'pen',
                     color: 'indigo',
                     steps: [
-                        { id: 'elaboracion', title: 'Elabora Contenidos', icon: FileText, jumpTo: 'MKT OPERATIVO' },
-                        { id: 'clickup', title: 'Sube a ClickUp', icon: Upload },
-                        { id: 'tareas', title: 'Crea Tareas', icon: Settings },
-                        { id: 'copies', title: 'Elabora Copies', icon: PenTool },
-                        { id: 'config', title: 'Configura Fechas', icon: Settings },
-                        { id: 'publica', title: 'Publica Contenidos', icon: MousePointer2, jumpTo: 'MKT OPERATIVO' }
+                        { id: 'elaboracion', title: 'Elabora Contenidos', icon: 'file', jumpTo: 'MKT OPERATIVO' },
+                        { id: 'clickup', title: 'Sube a ClickUp', icon: 'check' },
+                        { id: 'tareas', title: 'Crea Tareas', icon: 'settings' },
+                        { id: 'copies', title: 'Elabora Copies', icon: 'pen' },
+                        { id: 'config', title: 'Configura Fechas', icon: 'settings' },
+                        { id: 'publica', title: 'Publica Contenidos', icon: 'zap', jumpTo: 'MKT OPERATIVO' }
                     ]
                 },
                 {
                     id: 'operativo',
                     title: 'MKT OPERATIVO',
-                    icon: Settings,
+                    icon: 'settings',
                     color: 'orange',
                     steps: [
-                        { id: 'revision_dudas', title: 'Revisión (Dudas)', icon: Search, jumpTo: 'REGRESA A CONTENIDOS' },
-                        { id: 'revision_pub', title: 'Revisión Publicación', icon: CheckCircle2 },
-                        { id: 'metricas', title: 'Métricas Semanales', icon: BarChart3 },
-                        { id: 'mejora', title: 'Mejora Continua', icon: Target, jumpTo: 'MKT ADMIN' }
+                        { id: 'revision_dudas', title: 'Revisión (Dudas)', icon: 'search', jumpTo: 'REGRESA A CONTENIDOS' },
+                        { id: 'revision_pub', title: 'Revisión Publicación', icon: 'check' },
+                        { id: 'metricas', title: 'Métricas Semanales', icon: 'chart' },
+                        { id: 'mejora', title: 'Mejora Continua', icon: 'chart', jumpTo: 'MKT ADMIN' }
                     ]
                 },
                 {
                     id: 'administrativo',
                     title: 'MKT ADMIN',
-                    icon: BarChart3,
+                    icon: 'chart',
                     color: 'emerald',
                     steps: [
-                        { id: 'reportes', title: 'Genera Reportes', icon: FileText },
-                        { id: 'mejoras', title: 'Propuestas Mejora', icon: Target },
-                        { id: 'registro', title: 'Registro Leads', icon: Users },
-                        { id: 'calificacion', title: 'Lead Scoring', icon: BarChart3 },
-                        { id: 'ponderacion', title: 'Ponderación Final', icon: CheckCircle2 },
-                        { id: 'fin', title: 'Fin del Proceso', icon: CheckCircle2 }
+                        { id: 'reportes', title: 'Genera Reportes', icon: 'file' },
+                        { id: 'mejoras', title: 'Propuestas Mejora', icon: 'chart' },
+                        { id: 'registro', title: 'Registro Leads', icon: 'users' },
+                        { id: 'calificacion', title: 'Lead Scoring', icon: 'chart' },
+                        { id: 'ponderacion', title: 'Ponderación Final', icon: 'check' },
+                        { id: 'fin', title: 'Fin del Proceso', icon: 'check' }
                     ]
                 }
             ];
@@ -203,10 +226,10 @@
                                                 />
                                                 
                                                 {step.jumpTo && (
-                                                    <div className={`mb-4 flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase shadow-sm border
+                                                    <div className={`mb-4 flex items-center justify-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase shadow-sm border w-full max-w-[180px]
                                                         ${step.jumpTo.includes('REGRESA') ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
-                                                        {step.jumpTo.includes('REGRESA') ? <RefreshCw size={10} className="animate-spin-slow" /> : <Zap size={10} />}
-                                                        {step.jumpTo}
+                                                        <Icon name={step.jumpTo.includes('REGRESA') ? "refresh" : "zap"} size={10} className={step.jumpTo.includes('REGRESA') ? "animate-spin-slow" : ""} />
+                                                        <span className="truncate">{step.jumpTo}</span>
                                                     </div>
                                                 )}
 
@@ -232,7 +255,7 @@
                                     </span>
                                 </div>
                                 <div className="bg-white/10 p-2 rounded-xl group-hover:bg-white/20 transition-colors">
-                                    <ChevronRight size={24} />
+                                    <Icon name="chevronRight" size={24} />
                                 </div>
                             </button>
                         </div>
